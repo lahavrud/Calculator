@@ -37,9 +37,10 @@ h1 {
         inset 0 0 10px rgba(0, 0, 0, 0.2); 
 }
 
-.display {
+.display input {
     background-color: #acacac;
-    color: #535353;;
+    color: #535353;
+    width: 100%;
     font-family: 'Courier New', 'Lucida Console', Monaco, monospace;
     font-size: 2.5em;
     padding: 0.5em;
