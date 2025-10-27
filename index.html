@@ -10,44 +10,45 @@
     <h1>Lahav's Calculator</h1>
     <div class="calculator-container">
         <div class="display">
-            <input value="3+5"></input>
+            <input class="display-input" type="text" readonly></input>
         </div>
         <p class="separator-label-spec">L A H A V C O M P U T E   2 o o 4</p>
         <div class="buttons-container">
             <div class="sub-container-left">
-                <button>%</button>
-                <button>√</button>
-                <button>CE</button>
-                <button>⏻</button>
+                <button data-action="precent">%</button>
+                <button data-action="root">√</button>
+                <button data-action="clear">CE</button>
+                <button data-action="power">⏻</button>
 
                 
             </div>
             <div class="sub-container-mid">
                 <div class="numbers">
-                    <button>1</button>
-                    <button>2</button>
-                    <button>3</button>
-                    <button>4</button>
-                    <button>5</button>
-                    <button>6</button>
-                    <button>7</button>
-                    <button>8</button>
-                    <button>9</button>
-                    <button>0</button>
-                    <button>00</button>
-                    <button>.</button>
+                    <button data-number = '1'>1</button>
+                    <button data-number = '2'>2</button>
+                    <button data-number = '3'>3</button>
+                    <button data-number = '4'>4</button>
+                    <button data-number = '5'>5</button>
+                    <button data-number = '6'>6</button>
+                    <button data-number = '7'>7</button>
+                    <button data-number = '8'>8</button>
+                    <button data-number = '9'>9</button>
+                    <button data-number = '0'>0</button>
+                    <button data-number="00">00</button>
+                    <button data-action="decimal">.</button>
                 </div>
-                <button class="equal">=</button>
+                <button class="equal" data-action="equals">=</button>
             </div>
             <div class="sub-container-right">
-                    <button>÷</button>
-                    <button>x</button>
-                    <button>-</button>
-                    <button>+</button>
+                    <button data-operator="/">÷</button>
+                    <button data-operator="*">x</button>
+                    <button data-operator="-">-</button>
+                    <button data-operator="+">+</button>
                 
             </div>
         </div>
 
     </div>
+    <script src="main.js"></script>
 </body>
 </html>
