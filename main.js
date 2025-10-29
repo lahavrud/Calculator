@@ -17,13 +17,14 @@ function clickOnButton(e){
     }
 
     if (currentExpression.length == 16){
-        if (button.hasAttribute('data-number') || button.hasAttribute('data-decimal')){
-            console.log('Exceeded length of equation')
-            return;
-        }
+        console.log('Exceeded length of equation')
+        return;
     }
 
     if (button.hasAttribute('data-number')) {
+        if(lastInputType === "CLOSE_PAREN"){
+            return;
+        }
         lastInputType = "NUMBER";
         currentExpression += button.dataset.number
     } 
@@ -49,11 +50,20 @@ function clickOnButton(e){
         else if(actionType === 'decimal'){
                 handleDecimalPoint()
             }
+        else if(actionType === 'open-paren'){ 
+            if(lastInputType === 'NUMBER') {
+                return;
+            }
+            currentExpression += '(';
+            lastInputType = "OPEN_PAREN"; 
+        }
+        else if(actionType === 'close-paren'){
+            //logic for adding to current-expretion
+            currentExpression += ')';
+            lastInputType = "CLOSE_PAREN"; 
+        }
+    }
 
-        }
-        else {
-            console.log("action");
-        }
     updateDisplay();
 }
 
