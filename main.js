@@ -8,11 +8,19 @@ const buttonsContainer = document.querySelector('.buttons-container')
 
 
 function clickOnButton(e){
+
     const clickedElement = e.target;
     
     const button = clickedElement.closest('button');
     if (!button){
         return;
+    }
+
+    if (currentExpression.length == 16){
+        if (button.hasAttribute('data-number') || button.hasAttribute('data-decimal')){
+            console.log('Exceeded length of equation')
+            return;
+        }
     }
 
     if (button.hasAttribute('data-number')) {
@@ -33,6 +41,7 @@ function clickOnButton(e){
         const actionType = button.dataset.action;
         if ( actionType === 'equals') {
             lastInputType = "EQUALS";
+            tokenize(currentExpression);
         }
         else if(actionType === 'clear') {
             currentExpression = '';
@@ -51,7 +60,10 @@ function clickOnButton(e){
 //helper functions
 
 function updateDisplay(){
-    displayInput.value = currentExpression;
+    let displayString = currentExpression;
+    displayString = displayString.replace(/\*/g, 'x'); 
+    displayString = displayString.replace(/\//g, '÷');
+    displayInput.value = displayString;
 }
 
 
@@ -82,3 +94,34 @@ function lastIndexOfOperator(){
 }
 
 buttonsContainer.addEventListener('click', (e) => clickOnButton(e))
+
+function tokenize(expr){
+    const tokens = [];
+    let i=0;
+    const numbersAndDot = "0123456789.";
+    const operators = "+-*/";
+    while (i < expr.length){
+        const char = expr[i];
+
+        if(char === ' '){
+            i++;
+            continue;
+        }
+        if(numbersAndDot.includes(char)) {
+            let curNum = '';
+            while (i < expr.length && numbersAndDot.includes(expr[i])) {
+                curNum += expr[i];
+                i++;
+            }
+            tokens.push(curNum);
+        }
+        else if(operators.includes(char)){
+            tokens.push(char);
+            i++;
+        }
+        else {
+            i++;
+        }
+    }
+    return tokens;
+}
