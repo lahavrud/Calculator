@@ -1,40 +1,51 @@
-// ========================
-// 1. STATE & ELEMENTS
-// ========================
-
 let currentExpression = '';
 let lastInputType = '';
+let isOn = false;
+let isError = false;
+let isBlinking = false;
 
 const displayInput = document.querySelector('.display-input');
 const buttonsContainer = document.querySelector('.buttons-container');
-
 buttonsContainer.addEventListener('click', handleButtonClick);
-
-// ========================
-// 2. EVENT HANDLING
-// ========================
 
 function handleButtonClick(e) {
     const button = e.target.closest('button');
     if (!button) return;
 
-    if (lastInputType === "ERROR") resetExpression();
+    const isNumber = button.dataset.number;
+    const isOperator = button.dataset.operator;
+    const action = button.dataset.action;
 
-    if (button.dataset.number) handleNumber(button.dataset.number);
-    else if (button.dataset.operator) handleOperator(button.dataset.operator);
-    else if (button.dataset.action) handleAction(button.dataset.action);
+    if (isBlinking) return;
+
+    if (action === 'power') {
+        togglePower();
+        return;
+    }
+
+    if (!isOn) return;
+
+    if (isError) {
+        if (!(isNumber || action === 'open-paren' || isOperator === '+' || isOperator === '-')) return;
+        resetExpression();
+        isError = false;
+    }
+
+    if (lastInputType === "EQUALS") {
+        if (isNumber || action === 'open-paren') resetExpression();
+    }
+
+    if (isNumber) handleNumber(isNumber);
+    else if (isOperator) handleOperator(isOperator);
+    else if (action) handleAction(action);
 
     updateDisplay();
-    updateLastInputType();
 }
 
-// ========================
-// 3. INPUT HANDLERS
-// ========================
-
 function handleNumber(number) {
-    if (lastInputType === "CLOSE_PAREN") return;
+    if (currentExpression === '' && number === '00') return;
     currentExpression += number;
+    lastInputType = "NUMBER";
 }
 
 function handleOperator(operator) {
@@ -42,32 +53,40 @@ function handleOperator(operator) {
         currentExpression = currentExpression.slice(0, -1) + operator;
     } else if (lastInputType === "OPEN_PAREN" || currentExpression === '') {
         if (["+", "-"].includes(operator)) currentExpression += operator;
+        else return;
     } else {
         currentExpression += operator;
     }
+    lastInputType = "OPERATOR";
 }
 
 function handleAction(action) {
-    switch (action) {
+    switch(action) {
         case 'equals':
+            if(currentExpression === '') return;
             evaluateExpression();
+            lastInputType = "EQUALS";
             break;
         case 'clear':
             resetExpression();
             break;
         case 'decimal':
             handleDecimal();
+            lastInputType = "NUMBER";
             break;
         case 'open-paren':
             if (lastInputType === 'NUMBER' || lastInputType === 'CLOSE_PAREN') return;
             currentExpression += '(';
+            lastInputType = 'OPEN_PAREN';
             break;
         case 'close-paren':
-            if (['OPERATOR', 'OPEN_PAREN'].includes(lastInputType) || currentExpression === '') return;
+            if (['OPERATOR', 'OPEN_PAREN', ''].includes(lastInputType)) return;
             currentExpression += ')';
+            lastInputType = 'CLOSE_PAREN';
             break;
         case 'delete':
-            if (currentExpression.length > 0) currentExpression = currentExpression.slice(0, -1);
+            if(currentExpression.length > 0) currentExpression = currentExpression.slice(0, -1);
+            lastInputType = currentExpression ? getLastCharType() : '';
             break;
     }
 }
@@ -86,30 +105,39 @@ function resetExpression() {
     lastInputType = '';
 }
 
-function updateLastInputType() {
-    if (!currentExpression) {
-        lastInputType = '';
-        return;
-    }
-    const lastChar = currentExpression.slice(-1);
-    if (/\d/.test(lastChar)) lastInputType = 'NUMBER';
-    else if (lastChar === ')') lastInputType = 'CLOSE_PAREN';
-    else if (lastChar === '(') lastInputType = 'OPEN_PAREN';
-    else if ("+-*/".includes(lastChar)) lastInputType = 'OPERATOR';
-    else lastInputType = '';
-}
-
-// ========================
-// 4. DISPLAY LOGIC
-// ========================
-
 function updateDisplay() {
-    displayInput.value = currentExpression.replace(/\*/g, '×').replace(/\//g, '÷');
+    displayInput.value = currentExpression.replace(/\*/g,'×').replace(/\//g,'÷');
 }
 
-// ========================
-// 5. EXPRESSION LOGIC
-// ========================
+function getLastCharType() {
+    if (!currentExpression) return '';
+    const lastChar = currentExpression.slice(-1);
+    if (/\d/.test(lastChar)) return 'NUMBER';
+    if (lastChar === ')') return 'CLOSE_PAREN';
+    if (lastChar === '(') return 'OPEN_PAREN';
+    if ("+-*/".includes(lastChar)) return 'OPERATOR';
+    return '';
+}
+
+function togglePower() {
+    isOn = !isOn;
+    isError = false;
+    isBlinking = true;
+    const text = isOn ? 'ON' : 'OFF';
+    let blinkCount = 0;
+    const blinkLimit = 6;
+
+    const interval = setInterval(() => {
+        displayInput.value = (blinkCount % 2 === 0) ? text : '';
+        blinkCount++;
+        if (blinkCount > blinkLimit) {
+            clearInterval(interval);
+            isBlinking = false;
+            resetExpression();
+            updateDisplay();
+        }
+    }, 500);
+}
 
 function evaluateExpression() {
     try {
@@ -121,110 +149,84 @@ function evaluateExpression() {
     } catch (error) {
         console.error("Calculation Error:", error.message);
         currentExpression = "Error";
+        isError = true;
         lastInputType = "ERROR";
     }
 }
 
-// Tokenize with handling for + / - at beginning or after '('
 function tokenize(expr) {
     const tokens = [];
     let i = 0;
     const numbers = "0123456789.";
 
-    while (i < expr.length) {
-        let char = expr[i];
-
-        if (char === ' ') { i++; continue; }
-
-        if (numbers.includes(char) || 
-           ((char === '-' || char === '+') && (i === 0 || expr[i - 1] === '(' || "+-*/".includes(expr[i - 1])))) {
-            let numStr = char;
-            i++;
-            while (i < expr.length && numbers.includes(expr[i])) {
-                numStr += expr[i++];
-            }
-            tokens.push(numStr);
-            continue;
+    while(i<expr.length){
+        let char=expr[i];
+        if(char===' '){i++; continue;}
+        if(numbers.includes(char) || ((char==='-'||char==='+') && (i===0||expr[i-1]==='('||"+-*/".includes(expr[i-1])))){
+            let numStr=char;i++;
+            while(i<expr.length && numbers.includes(expr[i])) numStr+=expr[i++];
+            tokens.push(numStr); continue;
         }
-
-        if ("+-*/()".includes(char)) {
-            tokens.push(char);
-            i++;
-            continue;
-        }
-
+        if("+-*/()".includes(char)){tokens.push(char); i++; continue;}
         i++;
     }
-
     return tokens;
 }
 
-// Shunting Yard Algorithm
-function shuntingYard(tokens) {
-    const output = [];
-    const ops = [];
-
-    for (const token of tokens) {
-        if (!isNaN(token)) output.push(token);
-        else if (token === '(') ops.push(token);
-        else if (token === ')') {
-            while (ops.length && ops[ops.length - 1] !== '(') output.push(ops.pop());
-            if (!ops.length) throw new Error("Mismatched parentheses");
+function shuntingYard(tokens){
+    const output=[], ops=[];
+    for(const token of tokens){
+        if(!isNaN(token)) output.push(token);
+        else if(token==='(') ops.push(token);
+        else if(token===')'){
+            while(ops.length && ops[ops.length-1]!=='(') output.push(ops.pop());
+            if(!ops.length) throw new Error("Mismatched parentheses");
             ops.pop();
-        } else if ("+-*/".includes(token)) {
-            while (ops.length && ops[ops.length - 1] !== '(' && isHigherPrecedence(token, ops[ops.length - 1])) {
-                output.push(ops.pop());
-            }
+        } else if("+-*/".includes(token)){
+            while(ops.length && ops[ops.length-1]!=='(' && isHigherPrecedence(token, ops[ops.length-1])) output.push(ops.pop());
             ops.push(token);
         }
     }
-
-    while (ops.length) {
-        const op = ops.pop();
-        if (op === '(' || op === ')') throw new Error("Mismatched parentheses");
+    while(ops.length){
+        const op=ops.pop();
+        if(op==='('||op===')') throw new Error("Mismatched parentheses");
         output.push(op);
     }
-
     return output;
 }
 
-function calculateRPN(rpn) {
-    const stack = [];
-
-    for (const token of rpn) {
-        if (!isNaN(token)) stack.push(parseFloat(token));
-        else {
-            if (stack.length < 2) throw new Error("Invalid expression");
-            const b = stack.pop();
-            const a = stack.pop();
-            stack.push(applyOperator(a, b, token));
+function calculateRPN(rpn){
+    const stack=[];
+    for(const token of rpn){
+        if(!isNaN(token)) stack.push(parseFloat(token));
+        else{
+            if(stack.length<2) throw new Error("Invalid expression");
+            const b=stack.pop(), a=stack.pop();
+            stack.push(applyOperator(a,b,token));
         }
     }
-
-    if (stack.length !== 1) throw new Error("Invalid expression");
+    if(stack.length!==1) throw new Error("Invalid expression");
     return stack[0];
 }
 
-function applyOperator(a, b, op) {
-    switch (op) {
-        case '+': return a + b;
-        case '-': return a - b;
-        case '*': return a * b;
-        case '/': 
-            if (b === 0) throw new Error("Division by zero");
-            return a / b;
+function applyOperator(a,b,op){
+    switch(op){
+        case '+': return a+b;
+        case '-': return a-b;
+        case '*': return a*b;
+        case '/': if(b===0) throw new Error("Division by zero"); return a/b;
         default: throw new Error("Invalid operator");
     }
 }
 
-function getPrecedence(op) {
-    return "*/".includes(op) ? 2 : "+-".includes(op) ? 1 : 0;
+function getPrecedence(op){
+    return "*/".includes(op)?2: "+-".includes(op)?1:0;
 }
 
-function isHigherPrecedence(a, b) {
-    return getPrecedence(b) >= getPrecedence(a);
+function isHigherPrecedence(a,b){
+    return getPrecedence(b)>=getPrecedence(a);
 }
 
-function findLastOperatorIndex() {
-    return Math.max(...['+', '-', '*', '/'].map(op => currentExpression.lastIndexOf(op)));
+function findLastOperatorIndex(){
+    return Math.max(...['+','-','*','/'].map(op=>currentExpression.lastIndexOf(op)));
 }
