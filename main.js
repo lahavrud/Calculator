@@ -26,13 +26,15 @@ function handleButtonClick(e) {
     if (!isOn) return;
 
     if (isError) {
-        if (!(isNumber || action === 'open-paren' || isOperator === '+' || isOperator === '-')) return;
-        resetExpression();
-        isError = false;
+        if ((isNumber || action === 'open-paren' || isOperator === '+' || isOperator === '-') || action === 'clear') {
+            resetExpression();
+            isError = false;;
+        }
+        else return;         
     }
 
     if (lastInputType === "EQUALS") {
-        if (isNumber || action === 'open-paren') resetExpression();
+        if ((isNumber && isNumber != "00")|| action === 'open-paren') resetExpression();
     }
 
     if (isNumber) handleNumber(isNumber);
