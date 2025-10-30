@@ -88,10 +88,8 @@ h1 {
 }
 
 .equal {
-    width: 7.5em;
-    height: 60px;
-    font-size: 2em;
-    border-radius: 40px;
+    width: 9.8em;
+    height: 2em;
 }
 
 button {
@@ -117,10 +115,10 @@ button {
         0 6px 10px rgba(0, 0, 0, 0.2); 
 }
 button:hover {
-    background-color: #ccc; /* This remains active when pressed */
+    background-color: #ccc;
     box-shadow: 
         0 4px 0 #444,
-        0 8px 15px rgba(0, 0, 0, 0.3); /* This shadow stays! */
+        0 8px 15px rgba(0, 0, 0, 0.3); 
 }
 button:active {
   transform: translateY(4px);
