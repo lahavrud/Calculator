@@ -10,20 +10,20 @@ body {
     align-items: center;
     height: 100vh;
     justify-content: space-evenly;
-    background-color: #2b2b2b;
+    background-color: #2b2b2b; /* כהה ונעים לעיניים */
 }
 
 h1 {
     font-size: 4em; 
     font-family: "Lucida Console", Monaco, monospace;
     font-weight: 600;
-    color: #a8e6cf;
+    color: #a8e6cf; /* ירוק עדין */
     text-shadow: 0 0 3px #333;
 }
 
 .calculator-container {
     padding: 1em;
-    background-color: #3a3a3a;
+    background-color: #3a3a3a; /* רקע כהה נייטרלי */
     border: 1px solid #555; 
     border-radius: 10px;
     display: flex;
@@ -37,8 +37,8 @@ h1 {
 }
 
 .display input {
-    background-color: #1f1f1f;
-    color: #a8e6cf;
+    background-color: #1f1f1f; /* מסך כהה */
+    color: #a8e6cf; /* טקסט ירוק עדין */
     width: 100%;
     font-family: 'Courier New', 'Lucida Console', Monaco, monospace;
     font-size: 2.5em;
@@ -87,10 +87,11 @@ h1 {
 .equal {
     width: 9.8em;
     height: 2em;
-    background-color: #80cbc4;
+    background-color: #80cbc4; /* ירוק־תכלת עדין */
     color: #1f1f1f;
 }
 
+/* כפתורים כלליים */
 button {
     width: 3em;
     height: 2em;
@@ -104,29 +105,32 @@ button {
     font-weight: bold;
     text-transform: uppercase;
     transition: all 0.08s ease; 
-
-    background-color: #4a4a4a;
-    color: #dcedc1;
+    background-color: #4a4a4a; /* אפור כהה בסיסי */
+    color: #dcedc1; /* ירוק עדין */
     box-shadow: 0 3px 0 #222, 0 5px 8px rgba(0,0,0,0.3);
 }
 
+/* כפתורים מספריים */
 button[data-number] {
     background-color: #5c5c5c;
     color: #dcedc1;
 }
 
+/* כפתורים אופרטורים */
 button[data-operator] {
-    background-color: #607d8b;
+    background-color: #607d8b; /* כחול־אפור עדין */
     color: #e0f2f1;
 }
 
+/* כפתורים פעולות מיוחדות */
 button[data-action] {
-    background-color: #8d6e63;
+    background-color: #8d6e63; /* חום־אדמדם עדין */
     color: #fff3e0;
 }
 
+/* POWER */
 button[data-action="power"] {
-    background-color: #81d4fa;
+    background-color: #81d4fa; /* תכלת בהיר עדין */
     color: #1f1f1f;
 }
 
